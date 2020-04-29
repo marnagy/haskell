@@ -3,12 +3,13 @@
 -- 1) Definujte datový typ 'Trie k v' reprezentující trii, kde klíče (řetězce)
 -- jsou typu '[k]' a hodnoty typu 'v'.
 
-data Trie k v = TODO
+data Trie k v = Node (Maybe v) [(k, Trie k v)] | Last
+    deriving (Show)
 
 -- Implementujte následující:
 
 empty :: Trie k v
-empty = undefined
+empty = Last
 
 -- 'empty' je jednoduše konstanta, reprezentující prádznou trii.
 --
@@ -16,7 +17,8 @@ empty = undefined
 --
 
 singleton :: [k] -> v -> Trie k v
-singleton = undefined
+singleton [] v = Node (Just v) []
+singleton (x:xs) v = Node Nothing [(x, singleton xs v )]  
 
 -- 'singleton ks v' je trie, která obsahuje právě jednen klíč 'ks'
 -- s hodnotou 'v'.
@@ -36,7 +38,7 @@ insertWith = undefined
 --
 
 insert :: (Ord k) => [k] -> v -> Trie k v -> Trie k v
-insert = undefined
+insert = insertWith (\v1 _ -> v1)
 
 -- 'insert ks new t' vloží klíč 'ks' s hodnotou 'new' do trie 't'. Pokud trie
 -- již klíč 'ks' obsahuje, původní hodnota je nahrazena hodnotou 'new'
