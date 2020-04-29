@@ -11,8 +11,8 @@ rleEncode (x:xs)    = rleEncode_ x 1 xs
 rleEncode_ :: (Eq a) => a -> Int -> [a] -> [(Int, a)]
 rleEncode_ character number [] = [(number, character)]
 rleEncode_ character number (x:xs)
-    | x == character    = rleEncode_ character (number + 1) xs
-    | otherwise         = (number, character): rleEncode_ x 1 xs
+	| x == character    = rleEncode_ character (number + 1) xs
+	| otherwise         = (number, character): rleEncode_ x 1 xs
 
 -- >>> rleDecode [(1,'h'),(1,'e'),(2,'l'),(1,'o')]
 -- "hello"
@@ -22,11 +22,11 @@ rleDecode [] = []
 rleDecode ((number, char):xs) = rleDecode_ number char xs
 rleDecode_ :: Int -> a -> [(Int, a)] -> [a]
 rleDecode_ number character []
-    | number == 1   = [character]
-    | otherwise     = character: rleDecode_ (number - 1) character []
+	| number == 1   = [character]
+	| otherwise     = character: rleDecode_ (number - 1) character []
 rleDecode_ number character ((num, nextChar):xs)
-    | number == 1   = character: rleDecode_ num nextChar xs
-    | otherwise     = character: rleDecode_ (number - 1) character ((num, nextChar):xs)
+	| number == 1   = character: rleDecode_ num nextChar xs
+	| otherwise     = character: rleDecode_ (number - 1) character ((num, nextChar):xs)
 
 -- 2) Definujte nekonečný seznam všech prvočísel. Pokuste se o efektivní řešení.
 
@@ -44,18 +44,18 @@ mergeWith :: (a -> a -> Bool) -> [a] -> [a] -> [a]
 mergeWith _ x [] = x
 mergeWith _ [] y = y
 mergeWith comp (x:xs) (y:ys)
-    | comp x y  = x: mergeWith comp xs (y:ys)
-    | otherwise = y: mergeWith comp (x:xs) ys
+	| comp x y  = x: mergeWith comp xs (y:ys)
+	| otherwise = y: mergeWith comp (x:xs) ys
 
 sortWith  :: (a -> a -> Bool) -> [a] -> [a]
 sortWith comp [] = []
 sortWith comp (x:[]) = [x]
 sortWith comp (x:xs) = 
-    mergeWith comp firstSorted secondSorted
-    where 
-        halfLength = (length (x:xs)) `div` 2
-        firstSorted = sortWith comp (take halfLength (x:xs))
-        secondSorted = sortWith comp (drop halfLength (x:xs))
+	mergeWith comp firstSorted secondSorted
+	where 
+		halfLength = (length (x:xs)) `div` 2
+		firstSorted = sortWith comp (take halfLength (x:xs))
+		secondSorted = sortWith comp (drop halfLength (x:xs))
 
 -- Prvním argumentem je funkce, která provádí porovnávání.
 --
