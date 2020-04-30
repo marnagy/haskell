@@ -3,13 +3,13 @@
 -- 1) Definujte datový typ 'Trie k v' reprezentující trii, kde klíče (řetězce)
 -- jsou typu '[k]' a hodnoty typu 'v'.
 
-data Trie k v = Node (Maybe v) [(k, Trie k v)] | Last
+data Trie k v = Node (Maybe v) [(k, Trie k v)] | Last (Maybe v)
     deriving (Show)
 
 -- Implementujte následující:
 
 empty :: Trie k v
-empty = Last
+empty = Last Nothing
 
 -- 'empty' je jednoduše konstanta, reprezentující prádznou trii.
 --
@@ -17,7 +17,7 @@ empty = Last
 --
 
 singleton :: [k] -> v -> Trie k v
-singleton [] v = Node (Just v) []
+singleton [] v = Last (Just v)
 singleton (x:xs) v = Node Nothing [(x, singleton xs v )]  
 
 -- 'singleton ks v' je trie, která obsahuje právě jednen klíč 'ks'
@@ -27,11 +27,13 @@ singleton (x:xs) v = Node Nothing [(x, singleton xs v )]
 --
 
 insertWith :: (Ord k) => (v -> v -> v) -> [k] -> v -> Trie k v -> Trie k v
-insertWith _ [] v Last = Node (Just v) []
-insertWith _ (x:xs) v Last = Node Nothing [(x, singleton xs v)]
+insertWith _ [] v (Last Nothing) = Last (Just v)
+insertWith f [] v (Last (Just v1)) = Last (Just (f v v1))
+insertWith _ (x:xs) v (Last (Just v1)) = Node (Just v1) [(x, singleton xs v)]
+insertWith _ (x:xs) v (Last Nothing) = Node Nothing [(x, singleton xs v)]
 insertWith _ [] v (Node (Nothing) next) = Node (Just v) next
 insertWith f [] v (Node (Just v1) next) = Node (Just (f v v1)) next
-insertWith f (x:xs) v (Node v1 next) = case (get x next) of
+insertWith f (x:xs) v (Node v1 next) = case (contains x next) of
     False   -> Node v1 ((x, singleton xs v):next)
     True    -> Node v1 (replace f (x:xs) v next)
     where
@@ -42,11 +44,11 @@ insertWith f (x:xs) v (Node v1 next) = case (get x next) of
         replace _ [] _ _ = error "Logical error in insertWith code - 1"
         replace _ _ _ [] = error "Logical error in insertWith code - 2"
 
-get :: Eq a => a -> [(a,b)] -> Bool
-get y ((k,_):xs)
+contains :: Eq a => a -> [(a,b)] -> Bool
+contains y ((k,_):xs)
     | y == k    = True
-    | otherwise = get y xs
-get _ [] = False
+    | otherwise = contains y xs
+contains _ [] = False
 
 -- 'insertWith f ks new t' vloží klíč 'ks' s hodnotou 'new' do trie 't'. Pokud
 -- trie již klíč 'ks' (s hodnotou 'old') obsahuje, původní hodnota je nahrazena
@@ -68,8 +70,18 @@ insert = insertWith (\v1 _ -> v1)
 --
 
 find :: (Ord k) => [k] -> Trie k v -> Maybe v
-find = undefined
+find [] (Last val) = val
+find [] (Node val _) = val 
+find (x:xs) (Last _) = Nothing
+find (x:xs) (Node _ next) = case (contains x next) of
+    True    -> find' (x:xs) next
+    False   -> Nothing
 
+find' :: (Ord k) => [k] -> [(k, Trie k v)] -> Maybe v
+find' (k:ks) ((k1, t):ns)
+    | k == k1   = find ks t
+    | otherwise = find' (k:ks) ns
+find' _ _ = Nothing
 -- 'find k t' vrátí hodnotu odpovídající klíči 'k' (jako 'Just v'), pokud
 -- existuje, jinak 'Nothing'.
 --
