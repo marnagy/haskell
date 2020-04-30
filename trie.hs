@@ -27,7 +27,26 @@ singleton (x:xs) v = Node Nothing [(x, singleton xs v )]
 --
 
 insertWith :: (Ord k) => (v -> v -> v) -> [k] -> v -> Trie k v -> Trie k v
-insertWith = undefined
+insertWith _ [] v Last = Node (Just v) []
+insertWith _ (x:xs) v Last = Node Nothing [(x, singleton xs v)]
+insertWith _ [] v (Node (Nothing) next) = Node (Just v) next
+insertWith f [] v (Node (Just v1) next) = Node (Just (f v v1)) next
+insertWith f (x:xs) v (Node v1 next) = case (get x next) of
+    False   -> Node v1 ((x, singleton xs v):next)
+    True    -> Node v1 (replace f (x:xs) v next)
+    where
+        replace :: (Ord k) => (v -> v -> v) -> [k] -> v -> [(k, Trie k v)] -> [(k, Trie k v)]
+        replace f (k:ks) v ((k1, v1):xs)
+            | k == k1   = ((k1, insertWith f ks v v1):xs)
+            | otherwise = (k1,v1):replace f (k:ks) v xs
+        replace _ [] _ _ = error "Logical error in insertWith code - 1"
+        replace _ _ _ [] = error "Logical error in insertWith code - 2"
+
+get :: Eq a => a -> [(a,b)] -> Bool
+get y ((k,_):xs)
+    | y == k    = True
+    | otherwise = get y xs
+get _ [] = False
 
 -- 'insertWith f ks new t' vloží klíč 'ks' s hodnotou 'new' do trie 't'. Pokud
 -- trie již klíč 'ks' (s hodnotou 'old') obsahuje, původní hodnota je nahrazena
@@ -59,7 +78,15 @@ find = undefined
 --
 
 member :: (Ord k) => [k] -> Trie k v -> Bool
-member = undefined
+member k t = case (find k t) of
+    Nothing -> False
+    Just _ -> True
+--member z t = do
+--    val <- find z t
+--    hasValue
+--    where
+--        isValid Nothing = False
+--        isValid (Just _) = True
 
 -- 'member k t' zjistí, jestli se klíč 'k' nalézá v trii 't'.
 --
