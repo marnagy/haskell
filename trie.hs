@@ -72,16 +72,17 @@ insert = insertWith (\v1 _ -> v1)
 find :: (Ord k) => [k] -> Trie k v -> Maybe v
 find [] (Last val) = val
 find [] (Node val _) = val 
-find (x:xs) (Last _) = Nothing
-find (x:xs) (Node _ next) = case (contains x next) of
-    True    -> find' (x:xs) next
+find (_:_) (Last _) = Nothing
+find z@(x:xs) (Node _ next) = case (contains x next) of
+    True    -> find' z next
     False   -> Nothing
+    where
+        find' :: (Ord k) => [k] -> [(k, Trie k v)] -> Maybe v
+        find' (k:ks) ((k1, t):ns)
+            | k == k1   = find ks t
+            | otherwise = find' (k:ks) ns
+        find' _ _ = Nothing
 
-find' :: (Ord k) => [k] -> [(k, Trie k v)] -> Maybe v
-find' (k:ks) ((k1, t):ns)
-    | k == k1   = find ks t
-    | otherwise = find' (k:ks) ns
-find' _ _ = Nothing
 -- 'find k t' vrátí hodnotu odpovídající klíči 'k' (jako 'Just v'), pokud
 -- existuje, jinak 'Nothing'.
 --
@@ -113,7 +114,22 @@ fromList = undefined
 -- BONUS) Implementujte funkci
 
 delete :: (Ord k) => [k] -> Trie k v -> Trie k v
-delete = undefined
+delete [] (Last _) = Last Nothing
+delete [] (Node _ next) = Node Nothing next
+delete (x:xs) (Last val) = Last val
+delete (x:xs) (Node val next) = case (delete' (x:xs) next) of
+    []  -> Last val
+    -- not empty case
+    arr -> Node val arr
+    where
+        delete' :: (Ord k) => [k] -> [(k, Trie k v)] -> [(k, Trie k v)]        
+        delete' z@(y:ys) ((k, t):ns)
+            | y == k    = case (delete ys t) of
+                Last Nothing    -> ns
+                other     -> (k, other):ns
+            | otherwise = (k, t): delete' z ns
+        delete' _ _ = []
+
 
 -- 'delete ks t' smaže klíč 'ks' (a odpovídající hodnotu) z trie 't', pokud
 -- klíč 'ks' není v trii obsažený, 'delete' vrátí původní trii.
