@@ -60,5 +60,4 @@ loadDatabaseFrom weightsFileName valuesFileName = do
                         pure ((x,y) : rs)
                 merge [] [] = pure []
                 merge _ _ = error "Merging error"
-loadDatabaseFrom _ _    = error "Loading error"
 
