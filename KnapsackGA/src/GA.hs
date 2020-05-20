@@ -7,5 +7,5 @@ currentGen = 0 :: Integer
 currPopulation = [] :: [Chromosome]
 
 train :: IO String -> IO Int -> IO Int
-train DatabaseFileName genNum = do
+train databaseFileName genNum = do
     train' (loadData DatabaseFileName) 0 genNum mutationProb crossoverFunc
