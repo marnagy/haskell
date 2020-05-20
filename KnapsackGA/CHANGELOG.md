@@ -1,4 +1,4 @@
-# Revision history for Knapsack-GA
+# Revision history for KnapsackGA
 
 ## 0.1.0.0 -- YYYY-mm-dd
 
