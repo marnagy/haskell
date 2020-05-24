@@ -10,7 +10,7 @@ newChromosome :: [(Int, Int)] -> Int -> IO Chromosome
 newChromosome [] _ = error "Empty database"
 newChromosome database@((weight, value):xs) weightRestriction = do
         let itemsNum = length ((weight, value):xs)
-        let chromosome = generateEmptyChromosome itemsNum
+        let chromosome = generateEmptyChromosome 5
         takeRand database itemsNum weightRestriction chromosome
 
 takeRand :: [(Int, Int)] -> Int -> Int -> Chromosome -> IO Chromosome
@@ -61,3 +61,77 @@ loadDatabaseFrom weightsFileName valuesFileName = do
                 merge [] [] = pure []
                 merge _ _ = error "Merging error"
 
+crossover :: (IO [Chromosome] -> IO Chromosome) -> ((Chromosome, Chromosome) -> IO Chromosome)
+        -> IO [Chromosome] -> IO Chromosome
+crossover chooseParent crossoverFunc lastGen = do
+        parent1 <- chooseParent lastGen
+        parent2 <- chooseParent lastGen
+        crossoverFunc (parent1, parent2)
+
+defaultCrossover :: (Chromosome, Chromosome) -> IO Chromosome
+defaultCrossover (parent1@(Chromosome _ _ vals1), parent2) = do
+        --let newChrom = generateEmptyChromosome
+        let len = length vals1
+        let halfLen = len `div` 2
+        randInts <- getRandInts halfLen len
+        let randIntsOrd = sortWith (<) randInts
+        crossoverChrom randIntsOrd parent1 parent2
+
+-- ### CONTINUE HERE ###
+crossoverChrom :: [Int] -> Chromosome -> Chromosome -> Chromosome
+crossoverChrom vals par1 par2
+
+getRandInts :: Int -> Int -> IO [Int]
+getRandInts amount max = getRandInts' 0 amount max
+        where
+                getRandInts' :: Int -> Int -> Int -> IO [Int]
+                getRandInts' currAmount amount max
+                        | currAmount < amount   = do
+                                res <- getRandInts' (currAmount + 1) amount max
+                                randInt <- getRandNum (0, max)
+                                if res `contains` randInt then getRandInts' currAmount amount max
+                                else pure (randInt:res)
+                        | otherwise             = pure []
+                
+contains :: Eq a => [a] -> a -> Bool
+contains [] arg = False
+contains (x:xs) arg
+        | x == arg      = True
+        | otherwise     = contains xs arg
+
+defaultChooseParent :: IO [Chromosome] -> IO Chromosome
+defaultChooseParent lastGenIO = do
+        lastGen <- lastGenIO
+        randDouble <- getStdRandom (randomR (0 :: Double, 1 :: Double))
+        let Chromosome weight value vals = lastGen !! 0
+        let refValue = randDouble * fromIntegral value
+        randInt <- getStdRandom (randomR (0, length lastGen - 1))
+        defaultChooseParent' (>= refValue) (lastGen !! randInt)
+        where
+                defaultChooseParent' :: (Double -> Bool) -> Chromosome -> IO Chromosome
+                defaultChooseParent' test chrom@(Chromosome cWeight cValue vals)
+                        | test $ fromIntegral cValue    = pure chrom
+                        | otherwise                     = defaultChooseParent lastGenIO
+
+mergeWith :: (a -> a -> Bool) -> [a] -> [a] -> [a]
+mergeWith _ x [] = x
+mergeWith _ [] y = y
+mergeWith comp (x:xs) (y:ys)
+        | comp x y  = x: mergeWith comp xs (y:ys)
+        | otherwise = y: mergeWith comp (x:xs) ys
+
+toHalfs :: [a] -> ([a], [a])
+toHalfs [] = ([],[])
+toHalfs (x:xs) = do
+        let (a,b) = toHalfs xs
+        (b, x:a)
+
+sortWith  :: (a -> a -> Bool) -> [a] -> [a]
+sortWith _ [] = []
+sortWith _ (x:[]) = [x]
+sortWith comp (x:xs) = 
+        mergeWith comp firstSorted secondSorted
+        where 
+                halfLength = (length (x:xs)) `div` 2
+                firstSorted = sortWith comp (take halfLength (x:xs))
+                secondSorted = sortWith comp (drop halfLength (x:xs))

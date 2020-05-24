@@ -48,8 +48,8 @@ mergeWith comp (x:xs) (y:ys)
 	| otherwise = y: mergeWith comp (x:xs) ys
 
 sortWith  :: (a -> a -> Bool) -> [a] -> [a]
-sortWith comp [] = []
-sortWith comp (x:[]) = [x]
+sortWith _ [] = []
+sortWith _ (x:[]) = [x]
 sortWith comp (x:xs) = 
 	mergeWith comp firstSorted secondSorted
 	where 
