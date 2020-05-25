@@ -68,18 +68,31 @@ crossover chooseParent crossoverFunc lastGen = do
         parent2 <- chooseParent lastGen
         crossoverFunc (parent1, parent2)
 
-defaultCrossover :: (Chromosome, Chromosome) -> IO Chromosome
-defaultCrossover (parent1@(Chromosome _ _ vals1), parent2) = do
+defaultCrossover :: [(Int, Int)] -> (Chromosome, Chromosome) -> IO Chromosome
+defaultCrossover database (parent1@(Chromosome _ _ vals1), parent2@(Chromosome _ _ vals2)) = do
         --let newChrom = generateEmptyChromosome
         let len = length vals1
         let halfLen = len `div` 2
         randInts <- getRandInts halfLen len
         let randIntsOrd = sortWith (<) randInts
-        crossoverChrom randIntsOrd parent1 parent2
+        pure $ getVals 0 len database randIntsOrd (vals1,vals2)
+        where
+                getVals :: Int -> Int -> [(Int,Int)] -> [Int] -> ([Bool], [Bool]) -> Chromosome
+                getVals currIndex maxIndex database randInts (vals1, vals2)
+                        | currIndex == maxIndex = Chromosome 0 0 []
+                        | otherwise             = do
+                                let Chromosome resW resV vals = getVals (currIndex + 1) maxIndex database randInts (vals1, vals2)
+                                let (weight, value) = database !! currIndex
+                                if randInts `contains` currIndex then ( 
+                                        if vals1 !! currIndex then Chromosome (resW + weight) (resV + value) (True:vals)
+                                        else Chromosome resW resV (False:vals) )
+                                else (
+                                        if vals2 !! currIndex then Chromosome (resW + weight) (resV + value) (True:vals)
+                                        else Chromosome resW resV (False:vals) )
+
 
 -- ### CONTINUE HERE ###
-crossoverChrom :: [Int] -> Chromosome -> Chromosome -> Chromosome
-crossoverChrom vals par1 par2
+
 
 getRandInts :: Int -> Int -> IO [Int]
 getRandInts amount max = getRandInts' 0 amount max
