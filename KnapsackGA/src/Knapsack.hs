@@ -10,7 +10,7 @@ newChromosome :: [(Int, Int)] -> Int -> IO Chromosome
 newChromosome [] _ = error "Empty database"
 newChromosome database@((weight, value):xs) weightRestriction = do
         let itemsNum = length ((weight, value):xs)
-        let chromosome = generateEmptyChromosome 5
+        let chromosome = generateEmptyChromosome itemsNum
         takeRand database itemsNum weightRestriction chromosome
 
 takeRand :: [(Int, Int)] -> Int -> Int -> Chromosome -> IO Chromosome
@@ -70,7 +70,6 @@ crossover chooseParent crossoverFunc lastGen = do
 
 defaultCrossover :: [(Int, Int)] -> (Chromosome, Chromosome) -> IO Chromosome
 defaultCrossover database (parent1@(Chromosome _ _ vals1), parent2@(Chromosome _ _ vals2)) = do
-        --let newChrom = generateEmptyChromosome
         let len = length vals1
         let halfLen = len `div` 2
         randInts <- getRandInts halfLen len
@@ -90,10 +89,6 @@ defaultCrossover database (parent1@(Chromosome _ _ vals1), parent2@(Chromosome _
                                         if vals2 !! currIndex then Chromosome (resW + weight) (resV + value) (True:vals)
                                         else Chromosome resW resV (False:vals) )
 
-
--- ### CONTINUE HERE ###
-
-
 getRandInts :: Int -> Int -> IO [Int]
 getRandInts amount max = getRandInts' 0 amount max
         where
@@ -101,7 +96,7 @@ getRandInts amount max = getRandInts' 0 amount max
                 getRandInts' currAmount amount max
                         | currAmount < amount   = do
                                 res <- getRandInts' (currAmount + 1) amount max
-                                randInt <- getRandNum (0, max)
+                                randInt <- getRandNum (0, max - 1)
                                 if res `contains` randInt then getRandInts' currAmount amount max
                                 else pure (randInt:res)
                         | otherwise             = pure []
