@@ -1,12 +1,20 @@
-module Main where
+module Main 
+    ( main ) where 
+
+import GA
+import Knapsack
 
 main :: IO ()
 main = do
-    putStrLn "Input name of database file:"
-    fileName <- getLine
+    putStrLn "Input name of database file for weigths:"
+    weightsFileName <- getLine
+    putStrLn "Input name of database file for values:"
+    valuesFileName <- getLine
+    putStrLn "Input number of maximum weight:"
+    maxWeight <- readInt
     putStrLn "Input number of generations to train:"
     genNum <- readInt
-    putStrLn "Training initializing"
+    putStrLn "Starting training..."
     
 
 readInt :: IO Int

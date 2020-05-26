@@ -37,6 +37,9 @@ setItemInList (x:xs) n v
 getRandNum :: (Int, Int) -> IO Int
 getRandNum (lo, hi) = getStdRandom (randomR (lo, hi))
 
+getRandDouble :: (Double, Double) -> IO Double
+getRandDouble (lo, hi) = getStdRandom (randomR (lo, hi))
+
 generateEmptyChromosome :: Int -> Chromosome
 generateEmptyChromosome len = Chromosome 0 0 (generateFalseList len)
 
@@ -46,10 +49,12 @@ generateFalseList n
     | n > 0     = False: generateFalseList (n-1)
     | otherwise = error "Cannot generate list of negative length."
 
-loadDatabaseFrom :: String -> String -> IO [(Int, Int)]
+loadDatabaseFrom :: IO String -> IO String -> IO [(Int, Int)]
 loadDatabaseFrom weightsFileName valuesFileName = do
-        allLinesW <- readFile weightsFileName
-        allLinesV <- readFile valuesFileName
+        fileNameW <- weightsFileName
+        fileNameV <- valuesFileName
+        allLinesW <- readFile fileNameW
+        allLinesV <- readFile fileNameV
         let wList = map read $ lines allLinesW :: [Int]
         let vList = map read $ lines allLinesV :: [Int]
         merge wList vList
@@ -107,9 +112,9 @@ contains (x:xs) arg
         | x == arg      = True
         | otherwise     = contains xs arg
 
-defaultChooseParent :: IO [Chromosome] -> IO Chromosome
-defaultChooseParent lastGenIO = do
-        lastGen <- lastGenIO
+defaultChooseParent :: [Chromosome] -> IO Chromosome
+defaultChooseParent lastGen = do
+        --lastGen <- lastGenIO
         randDouble <- getStdRandom (randomR (0 :: Double, 1 :: Double))
         let Chromosome weight value vals = lastGen !! 0
         let refValue = randDouble * fromIntegral value
@@ -119,7 +124,7 @@ defaultChooseParent lastGenIO = do
                 defaultChooseParent' :: (Double -> Bool) -> Chromosome -> IO Chromosome
                 defaultChooseParent' test chrom@(Chromosome cWeight cValue vals)
                         | test $ fromIntegral cValue    = pure chrom
-                        | otherwise                     = defaultChooseParent lastGenIO
+                        | otherwise                     = defaultChooseParent lastGen
 
 mergeWith :: (a -> a -> Bool) -> [a] -> [a] -> [a]
 mergeWith _ x [] = x
