@@ -1,7 +1,6 @@
 module Knapsack where
 
 import System.Random
-import System.IO
 
 data Chromosome = Chromosome Int Int [Bool]
         deriving (Show)
@@ -148,3 +147,10 @@ sortWith comp (x:xs) =
                 halfLength = (length (x:xs)) `div` 2
                 firstSorted = sortWith comp (take halfLength (x:xs))
                 secondSorted = sortWith comp (drop halfLength (x:xs))
+
+mutate :: [(Int, Int)] -> Chromosome -> IO Chromosome
+mutate database chrom@(Chromosome weight value vals) = do
+        randInt <- getRandNum (0, length vals - 1)
+        let (weight1, value1) = database !! randInt
+        if vals !! randInt then pure (Chromosome (weight - weight1) (value - value1) $ setItemInList False vals)
+        else pure (Chromosome (weight + weight1) (value + value1) $ setItemInList True vals)

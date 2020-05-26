@@ -1,8 +1,8 @@
 module GA where
 
 import System.IO
-import Knapsack
 import Debug.Trace
+import Knapsack
 
 populationSize = 50 :: Integer
 mutationChance = 0.05 :: Double
@@ -17,7 +17,7 @@ train weightsFileName valuesFileName genNum weightRestriction = do
             | currGenNum <= genNum  = do
                 trace ("Generation number " ++ show currGenNum ++ " of " ++ show genNum ++ "generations") $
                     train' database (currGenNum + 1) genNum mutationProb crossoverFunc $ 
-                        generateNextGen database  weightRestriction 1 populationSize mutationProb crossoverFunc lastGen
+                        generateNextGen database weightRestriction 1 populationSize mutationProb crossoverFunc lastGen
                 --parent1 <- defaultChooseParent lastGen
                 --parent2 <- defaultChooseParent lastGen
                 
@@ -36,7 +36,7 @@ generateNextGen database maxWeight currAmount maxAmount mutationProb crossoverFu
         chrom@(Chromosome weight value vals) <- crossoverFunc database (parent1, parent2)
         gotProb <- getRandDouble (0.0 :: Double, 1.0 :: Double)
         if mutationProb >= gotProb then do 
-            let chrom = mutate chrom
+            chrom <- mutate database chrom
             if weight <= maxWeight then chrom : generateNextGen database maxWeight (currAmount + 1) maxAmount mutationProb crossoverFunc lastGen
             else generateNextGen database maxWeight currAmount maxAmount mutationProb crossoverFunc lastGen
         else (
