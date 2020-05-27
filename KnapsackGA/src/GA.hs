@@ -4,22 +4,26 @@ import System.IO
 import Debug.Trace
 import Knapsack
 
-populationSize = 50 :: Int
-mutationChance = 0.05 :: Double
+populationSize = 20 :: Int
+mutationChance = 0.1 :: Double
 
 train :: String -> String -> Int -> Int -> IO Chromosome
 train weightsFileName valuesFileName genNum weightRestriction = do
     database <- loadDatabaseFrom weightsFileName valuesFileName
-    lastGen <- train' database 1 genNum weightRestriction mutationChance defaultCrossover $ firstGen database populationSize weightRestriction
-    pure (lastGen !! 0)
+    lastGen <- train' database 1 genNum weightRestriction mutationChance defaultCrossover $ 
+        firstGen database populationSize weightRestriction
+    let sortedGen = sortWith (\x@(Chromosome _ value1 _) y@(Chromosome _ value2 _) -> value1 > value2) lastGen
+    trace ("Sorted: " ++ show sortedGen) $ pure (sortedGen !! 0)
     where
         train' :: [(Int, Int)] -> Int -> Int -> Int -> Double -> ([(Int, Int)] -> (Chromosome, Chromosome) -> IO Chromosome) -> IO [Chromosome] -> IO [Chromosome]
-        train' database currGenNum genNum weightRestriction mutationProb crossoverFunc lastGen
+        train' database currGenNum genNum weightRestriction mutationProb crossoverFunc lastGenIO
             | currGenNum <= genNum  = do
-                trace ("Generation number " ++ show currGenNum ++ " of " ++ show genNum ++ "generations") $
-                    train' database (currGenNum + 1) genNum weightRestriction mutationProb crossoverFunc $ 
-                        generateNextGen database weightRestriction 1 populationSize mutationProb crossoverFunc lastGen                
-            | otherwise             = lastGen
+                lastGen <- lastGenIO
+                trace ("\nGeneration number " ++ show currGenNum ++ " of " ++ show genNum ++ " generations") $
+                    trace (show lastGen) $
+                        train' database (currGenNum + 1) genNum weightRestriction mutationProb crossoverFunc $ 
+                            generateNextGen database weightRestriction 1 populationSize mutationProb crossoverFunc lastGenIO
+            | otherwise             = lastGenIO
 
 firstGen :: [(Int, Int)] -> Int -> Int -> IO [Chromosome]
 firstGen database populationToGenerate weightRestriction
@@ -49,4 +53,4 @@ generateNextGen database maxWeight currAmount maxAmount mutationProb crossoverFu
                 pure (chrom :res)
             else generateNextGen database maxWeight currAmount maxAmount mutationProb crossoverFunc lastGenIO
                 )
-    else lastGenIO
+    else pure []

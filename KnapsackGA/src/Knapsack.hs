@@ -1,6 +1,7 @@
 module Knapsack where
 
 import System.Random
+import Debug.Trace
 
 data Chromosome = Chromosome Int Int [Bool]
         deriving (Show)
@@ -68,7 +69,7 @@ crossover :: (IO [Chromosome] -> IO Chromosome) -> ((Chromosome, Chromosome) -> 
 crossover chooseParent crossoverFunc lastGen = do
         parent1 <- chooseParent lastGen
         parent2 <- chooseParent lastGen
-        crossoverFunc (parent1, parent2)
+        trace "Doing crossover" $ crossoverFunc (parent1, parent2)
 
 defaultCrossover :: [(Int, Int)] -> (Chromosome, Chromosome) -> IO Chromosome
 defaultCrossover database (parent1@(Chromosome _ _ vals1), parent2@(Chromosome _ _ vals2)) = do
@@ -139,12 +140,15 @@ toHalfs (x:xs) = do
 sortWith  :: (a -> a -> Bool) -> [a] -> [a]
 sortWith _ [] = []
 sortWith _ (x:[]) = [x]
-sortWith comp (x:xs) = 
+sortWith comp (x:xs) = do
+        let (first, second) = toHalfs (x:xs)
+        let firstSorted = sortWith comp first
+        let secondSorted = sortWith comp second
         mergeWith comp firstSorted secondSorted
-        where 
-                halfLength = (length (x:xs)) `div` 2
-                firstSorted = sortWith comp (take halfLength (x:xs))
-                secondSorted = sortWith comp (drop halfLength (x:xs))
+        --where 
+        --        halfLength = (length (x:xs)) `div` 2
+        --        firstSorted = sortWith comp (take halfLength (x:xs))
+        --        secondSorted = sortWith comp (drop halfLength (x:xs))
 
 mutate :: [(Int, Int)] -> Chromosome -> IO Chromosome
 mutate database chrom@(Chromosome weight value vals) = do
