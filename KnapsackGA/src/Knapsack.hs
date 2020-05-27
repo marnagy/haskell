@@ -111,9 +111,9 @@ contains (x:xs) arg
         | x == arg      = True
         | otherwise     = contains xs arg
 
-defaultChooseParent :: [Chromosome] -> IO Chromosome
-defaultChooseParent lastGen = do
-        --lastGen <- lastGenIO
+defaultChooseParent :: IO [Chromosome] -> IO Chromosome
+defaultChooseParent lastGenIO = do
+        lastGen <- lastGenIO
         randDouble <- getStdRandom (randomR (0 :: Double, 1 :: Double))
         let Chromosome weight value vals = lastGen !! 0
         let refValue = randDouble * fromIntegral value
@@ -123,7 +123,7 @@ defaultChooseParent lastGen = do
                 defaultChooseParent' :: (Double -> Bool) -> Chromosome -> IO Chromosome
                 defaultChooseParent' test chrom@(Chromosome cWeight cValue vals)
                         | test $ fromIntegral cValue    = pure chrom
-                        | otherwise                     = defaultChooseParent lastGen
+                        | otherwise                     = defaultChooseParent lastGenIO
 
 mergeWith :: (a -> a -> Bool) -> [a] -> [a] -> [a]
 mergeWith _ x [] = x
@@ -152,5 +152,5 @@ mutate :: [(Int, Int)] -> Chromosome -> IO Chromosome
 mutate database chrom@(Chromosome weight value vals) = do
         randInt <- getRandNum (0, length vals - 1)
         let (weight1, value1) = database !! randInt
-        if vals !! randInt then pure (Chromosome (weight - weight1) (value - value1) $ setItemInList False vals)
-        else pure (Chromosome (weight + weight1) (value + value1) $ setItemInList True vals)
+        if vals !! randInt then pure (Chromosome (weight - weight1) (value - value1) $ setItemInList vals randInt False)
+        else pure (Chromosome (weight + weight1) (value + value1) $ setItemInList vals randInt True)
