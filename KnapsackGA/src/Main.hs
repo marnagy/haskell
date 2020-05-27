@@ -15,6 +15,8 @@ main = do
     putStrLn "Input number of generations to train:"
     genNum <- readInt
     putStrLn "Starting training..."
+    res <- train weightsFileName valuesFileName genNum maxWeight
+    putStrLn $ show res
     
 
 readInt :: IO Int

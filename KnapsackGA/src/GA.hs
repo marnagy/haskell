@@ -7,11 +7,9 @@ import Knapsack
 populationSize = 50 :: Int
 mutationChance = 0.05 :: Double
 
-train :: IO String -> IO String -> IO Int -> IO Int -> IO Chromosome
-train weightsFileName valuesFileName genNumIO weightRestrictionIO = do
-    weightRestriction <- weightRestrictionIO
+train :: String -> String -> Int -> Int -> IO Chromosome
+train weightsFileName valuesFileName genNum weightRestriction = do
     database <- loadDatabaseFrom weightsFileName valuesFileName
-    genNum <- genNumIO
     lastGen <- train' database 1 genNum weightRestriction mutationChance defaultCrossover $ firstGen database populationSize weightRestriction
     pure (lastGen !! 0)
     where

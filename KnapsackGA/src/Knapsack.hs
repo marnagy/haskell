@@ -48,12 +48,10 @@ generateFalseList n
     | n > 0     = False: generateFalseList (n-1)
     | otherwise = error "Cannot generate list of negative length."
 
-loadDatabaseFrom :: IO String -> IO String -> IO [(Int, Int)]
+loadDatabaseFrom :: String -> String -> IO [(Int, Int)]
 loadDatabaseFrom weightsFileName valuesFileName = do
-        fileNameW <- weightsFileName
-        fileNameV <- valuesFileName
-        allLinesW <- readFile fileNameW
-        allLinesV <- readFile fileNameV
+        allLinesW <- readFile weightsFileName
+        allLinesV <- readFile valuesFileName
         let wList = map read $ lines allLinesW :: [Int]
         let vList = map read $ lines allLinesV :: [Int]
         merge wList vList
