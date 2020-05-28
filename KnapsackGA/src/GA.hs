@@ -19,10 +19,11 @@ train weightsFileName valuesFileName genNum weightRestriction = do
         train' database currGenNum genNum weightRestriction mutationProb crossoverFunc lastGenIO
             | currGenNum <= genNum  = do
                 lastGen <- lastGenIO
+                let sorted = sortWith (\x@(Chromosome _ value1 _) y@(Chromosome _ value2 _) -> value1 > value2) lastGen
                 trace ("\nGeneration number " ++ show currGenNum ++ " of " ++ show genNum ++ " generations") $
-                    trace (show lastGen) $
+                    trace (show sorted) $
                         train' database (currGenNum + 1) genNum weightRestriction mutationProb crossoverFunc $ 
-                            generateNextGen database weightRestriction 1 populationSize mutationProb crossoverFunc lastGenIO
+                            generateNextGen database weightRestriction 1 populationSize mutationProb crossoverFunc $ pure sorted
             | otherwise             = lastGenIO
 
 firstGen :: [(Int, Int)] -> Int -> Int -> IO [Chromosome]
@@ -52,4 +53,4 @@ generateNextGen database maxWeight currAmount maxAmount mutationProb crossoverFu
                 pure (chrom :res)
             else generateNextGen database maxWeight currAmount maxAmount mutationProb crossoverFunc lastGenIO
                 )
-    | otherwise                 = trace "End generating generation" $ pure []
+    | otherwise                 = pure [] --trace "End generating generation" $ pure []
