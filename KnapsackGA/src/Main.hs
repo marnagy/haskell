@@ -16,7 +16,7 @@ main = do
     genNum <- readInt
     putStrLn "Starting training..."
     res <- train weightsFileName valuesFileName genNum maxWeight
-    putStrLn $ show res
+    putStrLn ("Best: " ++ show res)
     
 
 readInt :: IO Int
