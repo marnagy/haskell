@@ -10,10 +10,12 @@ mutationChance = 0.1 :: Double
 train :: String -> String -> Int -> Int -> IO Chromosome
 train weightsFileName valuesFileName genNum weightRestriction = do
     database <- loadDatabaseFrom weightsFileName valuesFileName
-    lastGen <- train' database 1 genNum weightRestriction mutationChance defaultCrossover $ 
-        firstGen database populationSize weightRestriction
-    let sorted = sortWith (\x@(Chromosome _ value1 _) y@(Chromosome _ value2 _) -> value1 > value2) lastGen
-    pure (sorted !! 0)
+    if 0 == length database then (error "Invalid database")
+    else do
+        lastGen <- train' database 1 genNum weightRestriction mutationChance defaultCrossover $ 
+            firstGen database populationSize weightRestriction
+        let sorted = sortWith (\x@(Chromosome _ value1 _) y@(Chromosome _ value2 _) -> value1 > value2) lastGen
+        pure (sorted !! 0)
     where
         train' :: [(Int, Int)] -> Int -> Int -> Int -> Double -> ([(Int, Int)] -> (Chromosome, Chromosome) -> IO Chromosome) -> IO [Chromosome] -> IO [Chromosome]
         train' database currGenNum genNum weightRestriction mutationProb crossoverFunc lastGenIO
