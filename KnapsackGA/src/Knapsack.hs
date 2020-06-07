@@ -85,14 +85,14 @@ defaultCrossover database ((Chromosome _ _ vals1), (Chromosome _ _ vals2)) = do
                                         else Chromosome resW resV (False:vals) )
 
 getRandInts :: Int -> Int -> IO [Int]
-getRandInts amount max = getRandInts' 0 amount max
+getRandInts amount maxIndex = getRandInts' 0
         where
-                getRandInts' :: Int -> Int -> Int -> IO [Int]
-                getRandInts' currAmount amount max
+                getRandInts' :: Int -> IO [Int]
+                getRandInts' currAmount
                         | currAmount < amount   = do
-                                res <- getRandInts' (currAmount + 1) amount max
-                                randInt <- getRandNum (0, max - 1)
-                                if res `contains` randInt then getRandInts' currAmount amount max
+                                res <- getRandInts' (currAmount + 1)
+                                randInt <- getRandNum (0, maxIndex - 1)
+                                if res `contains` randInt then getRandInts' currAmount
                                 else pure (randInt:res)
                         | otherwise             = pure []
                 
