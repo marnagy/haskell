@@ -4,8 +4,8 @@ import System.IO
 import Debug.Trace
 import Knapsack
 
-populationSize = 20 :: Int
-mutationChance = 0.1 :: Double
+populationSize = 10 :: Int
+mutationChance = 0.25 :: Double
 
 train :: String -> String -> Int -> Int -> IO Chromosome
 train weightsFileName valuesFileName genNum weightRestriction = do
@@ -22,10 +22,9 @@ train weightsFileName valuesFileName genNum weightRestriction = do
             | currGenNum <= genNum  = do
                 lastGen <- lastGenIO
                 let sorted = sortWith (\x@(Chromosome _ value1 _) y@(Chromosome _ value2 _) -> value1 > value2) lastGen
-                --trace ("Generation number " ++ show currGenNum ++ " of " ++ show genNum ++ " generations") $
-                --    trace ("Best: " ++ show (sorted !! 0) ++ "\n") $
-                --        train' database (currGenNum + 1) genNum weightRestriction mutationProb crossoverFunc $ 
-                generateNextGen database weightRestriction 1 populationSize mutationProb crossoverFunc $ pure sorted
+                putStrLn ("Generation " ++ show currGenNum ++ " best: " ++ show (sorted !! 0) ++ "\n")
+                train' database (currGenNum + 1) genNum weightRestriction mutationProb crossoverFunc $
+                    generateNextGen database weightRestriction 1 populationSize mutationProb crossoverFunc $ pure sorted
             | otherwise             = lastGenIO
 
 firstGen :: [(Int, Int)] -> Int -> Int -> IO [Chromosome]
@@ -39,8 +38,9 @@ firstGen database populationToGenerate weightRestriction
 generateNextGen :: [(Int,Int)] -> Int -> Int -> Int -> Double -> ([(Int, Int)] -> (Chromosome, Chromosome) -> IO Chromosome) -> IO [Chromosome] -> IO [Chromosome]
 generateNextGen database maxWeight currAmount maxAmount mutationProb crossoverFunc lastGenIO
     | currAmount <= maxAmount    = do
-        parent1 <- defaultChooseParent lastGenIO
-        parent2 <- defaultChooseParent lastGenIO
+        lastGen <- lastGenIO
+        parent1 <- defaultChooseParent lastGen
+        parent2 <- defaultChooseParent lastGen
         chrom@(Chromosome weight value vals) <- crossoverFunc database (parent1, parent2)
         gotProb <- getRandDouble (0.0 :: Double, 1.0 :: Double)
         if mutationProb >= gotProb then (do 

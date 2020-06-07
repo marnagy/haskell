@@ -1,7 +1,6 @@
 module Knapsack where
 
 import System.Random
-import Debug.Trace
 
 data Chromosome = Chromosome Int Int [Bool]
         deriving (Show)
@@ -62,17 +61,10 @@ loadDatabaseFrom weightsFileName valuesFileName = do
                         rs <- merge xs ys
                         pure ((x,y) : rs)
                 merge [] [] = pure []
-                merge _ _ = error "Merging error"
-
-crossover :: (IO [Chromosome] -> IO Chromosome) -> ((Chromosome, Chromosome) -> IO Chromosome)
-        -> IO [Chromosome] -> IO Chromosome
-crossover chooseParent crossoverFunc lastGen = do
-        parent1 <- chooseParent lastGen
-        parent2 <- chooseParent lastGen
-        trace "Doing crossover" $ crossoverFunc (parent1, parent2)
+                merge _ _ = error "Weights and values files have different amounts of values"
 
 defaultCrossover :: [(Int, Int)] -> (Chromosome, Chromosome) -> IO Chromosome
-defaultCrossover database (parent1@(Chromosome _ _ vals1), parent2@(Chromosome _ _ vals2)) = do
+defaultCrossover database ((Chromosome _ _ vals1), (Chromosome _ _ vals2)) = do
         let len = length vals1
         let halfLen = len `div` 2
         randInts <- getRandInts halfLen len
@@ -105,24 +97,23 @@ getRandInts amount max = getRandInts' 0 amount max
                         | otherwise             = pure []
                 
 contains :: Eq a => [a] -> a -> Bool
-contains [] arg = False
+contains [] _ = False
 contains (x:xs) arg
         | x == arg      = True
         | otherwise     = contains xs arg
 
-defaultChooseParent :: IO [Chromosome] -> IO Chromosome
-defaultChooseParent lastGenIO = do
-        lastGen <- lastGenIO
+defaultChooseParent :: [Chromosome] -> IO Chromosome
+defaultChooseParent lastGen = do
         randDouble <- getStdRandom (randomR (0 :: Double, 1 :: Double))
-        let Chromosome weight value vals = lastGen !! 0
+        let Chromosome _ value _ = lastGen !! 0
         let refValue = randDouble * fromIntegral value
         randInt <- getStdRandom (randomR (0, length lastGen - 1))
         defaultChooseParent' (>= refValue) (lastGen !! randInt)
         where
                 defaultChooseParent' :: (Double -> Bool) -> Chromosome -> IO Chromosome
-                defaultChooseParent' test chrom@(Chromosome cWeight cValue vals)
+                defaultChooseParent' test chrom@(Chromosome _ cValue _)
                         | test $ fromIntegral cValue    = pure chrom
-                        | otherwise                     = defaultChooseParent lastGenIO
+                        | otherwise                     = defaultChooseParent lastGen
 
 mergeWith :: (a -> a -> Bool) -> [a] -> [a] -> [a]
 mergeWith _ x [] = x
@@ -151,7 +142,7 @@ sortWith comp (x:xs) = do
         --        secondSorted = sortWith comp (drop halfLength (x:xs))
 
 mutate :: [(Int, Int)] -> Chromosome -> IO Chromosome
-mutate database chrom@(Chromosome weight value vals) = do
+mutate database (Chromosome weight value vals) = do
         randInt <- getRandNum (0, length vals - 1)
         let (weight1, value1) = database !! randInt
         if vals !! randInt then pure (Chromosome (weight - weight1) (value - value1) $ setItemInList vals randInt False)
