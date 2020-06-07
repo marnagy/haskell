@@ -136,10 +136,6 @@ sortWith comp (x:xs) = do
         let firstSorted = sortWith comp first
         let secondSorted = sortWith comp second
         mergeWith comp firstSorted secondSorted
-        --where 
-        --        halfLength = (length (x:xs)) `div` 2
-        --        firstSorted = sortWith comp (take halfLength (x:xs))
-        --        secondSorted = sortWith comp (drop halfLength (x:xs))
 
 mutate :: [(Int, Int)] -> Chromosome -> IO Chromosome
 mutate database (Chromosome weight value vals) = do
