@@ -2,5 +2,5 @@ KnapsackGA/src/*.txt
 KnapsackGA/src/*.o
 KnapsackGA/src/*.hi
 KnapsackGA/src/*.exe
-KnapsackGA/src/weights.txt
-KnapsackGA/src/values.txt
+KnapsackGA/src/*.txt
+KnapsackGA/dist/
