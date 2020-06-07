@@ -69,13 +69,13 @@ defaultCrossover database ((Chromosome _ _ vals1), (Chromosome _ _ vals2)) = do
         let halfLen = len `div` 2
         randInts <- getRandInts halfLen len
         let randIntsOrd = sortWith (<) randInts
-        pure $ getVals 0 len database randIntsOrd (vals1,vals2)
+        pure $ getVals 0 len randIntsOrd
         where
-                getVals :: Int -> Int -> [(Int,Int)] -> [Int] -> ([Bool], [Bool]) -> Chromosome
-                getVals currIndex maxIndex database randInts (vals1, vals2)
+                getVals :: Int -> Int -> [Int] -> Chromosome
+                getVals currIndex maxIndex randInts
                         | currIndex == maxIndex = Chromosome 0 0 []
                         | otherwise             = do
-                                let Chromosome resW resV vals = getVals (currIndex + 1) maxIndex database randInts (vals1, vals2)
+                                let Chromosome resW resV vals = getVals (currIndex + 1) maxIndex randInts
                                 let (weight, value) = database !! currIndex
                                 if randInts `contains` currIndex then ( 
                                         if vals1 !! currIndex then Chromosome (resW + weight) (resV + value) (True:vals)
