@@ -1,9 +1,11 @@
+-- | Main module
 module Main 
     ( main ) where 
 
 import GA
 import Knapsack
 
+-- | Main function.
 main :: IO ()
 main = do
     putStrLn "Input name of database file for weigths:"
@@ -18,7 +20,7 @@ main = do
     res <- train weightsFileName valuesFileName genNum maxWeight
     putStrLn ("Best: " ++ show res)
     
-
+-- | Read Int from console.
 readInt :: IO Int
 readInt = do
     int <- getLine

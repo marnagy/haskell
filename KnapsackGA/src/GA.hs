@@ -1,14 +1,20 @@
+-- | General implementation of GA for the knapsack problem.
 module GA where
 
 import System.IO
 import Debug.Trace
 import Knapsack
 
-populationSize = 10 :: Int
+-- | Default population size.
+populationSize = 20 :: Int
+
+-- | Default mutation chance.
 mutationChance = 0.25 :: Double
 
+-- | Data type to store values that are not chaning thoughout the algorithm.
 data GA_Args = Args [(Int, Int)] Int Double ([(Int, Int)] -> (Chromosome, Chromosome) -> IO Chromosome)
 
+-- | Main training function.
 train :: String -> String -> Int -> Int -> IO Chromosome
 train weightsFileName valuesFileName genNum weightRestriction = do
     database <- loadDatabaseFrom weightsFileName valuesFileName
@@ -30,6 +36,7 @@ train weightsFileName valuesFileName genNum weightRestriction = do
                     generateNextGen args 1 populationSize $ pure sorted
             | otherwise             = lastGenIO
 
+-- | Generating first random generation.
 firstGen :: [(Int, Int)] -> Int -> Int -> IO [Chromosome]
 firstGen database populationToGenerate weightRestriction
     | populationToGenerate == 0 = pure []
@@ -37,7 +44,8 @@ firstGen database populationToGenerate weightRestriction
         res <- firstGen database (populationToGenerate - 1) weightRestriction
         chrom <- newChromosome database weightRestriction
         pure (chrom : res)
-        
+
+-- | Generating next generation using crossover and mutation
 generateNextGen :: GA_Args -> Int -> Int -> IO [Chromosome] -> IO [Chromosome]
 generateNextGen args@(Args database weightRestriction mutationProb crossoverFunc) currAmount maxAmount lastGenIO
     | currAmount <= maxAmount    = do
