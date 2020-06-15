@@ -102,6 +102,9 @@ defaultCrossover database ((Chromosome _ _ vals1), (Chromosome _ _ vals2)) = do
 -- | Get N random non-repeating Ints in range [0,maxIndex - 1]
 --
 -- If amount > maxIndex, returns pure []
+--
+-- >>>getRandInts 5 10
+-- [3,7,1,5,4]
 getRandInts :: Int -> Int -> IO [Int]
 getRandInts amount maxIndex
     | amount > maxIndex || amount < 0   = pure []
