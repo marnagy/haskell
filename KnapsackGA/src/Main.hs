@@ -6,6 +6,9 @@ import GA
 import Knapsack
 
 -- | Main function.
+--
+-- Here you input path to files with weights and values for items
+-- as well as weight restriction for solution and amount of generations to train.
 main :: IO ()
 main = do
     putStrLn "Input name of database file for weigths:"

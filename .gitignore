@@ -4,3 +4,5 @@ KnapsackGA/src/*.hi
 KnapsackGA/src/*.exe
 KnapsackGA/src/*.txt
 KnapsackGA/dist/build/
+*.o
+*.hi

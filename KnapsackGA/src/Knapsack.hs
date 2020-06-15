@@ -27,6 +27,15 @@ newChromosome database weightRestriction = do
                     else takeRand (iterVar - 1) chrom
             | iterVar == 0  = pure chrom
             | otherwise     = error "Invalid number to iterate."
+        
+        generateEmptyChromosome :: Int -> Chromosome
+        generateEmptyChromosome len = Chromosome 0 0 (generateFalseList len)
+
+        generateFalseList :: Int -> [Bool]
+        generateFalseList n
+            | n == 0    = []
+            | n > 0     = False: generateFalseList (n-1)
+            | otherwise = error "Cannot generate list of negative length."
 
 -- | Set item on specific index in list.
 setItemInList :: [a] -> Int -> a -> [a]
@@ -44,17 +53,12 @@ getRandNum (lo, hi) = getStdRandom (randomR (lo, hi))
 getRandDouble :: (Double, Double) -> IO Double
 getRandDouble (lo, hi) = getStdRandom (randomR (lo, hi))
 
--- | Generate chromosome with no chosen items.
-generateEmptyChromosome :: Int -> Chromosome
-generateEmptyChromosome len = Chromosome 0 0 (generateFalseList len)
-    where
-        generateFalseList :: Int -> [Bool]
-        generateFalseList n
-            | n == 0    = []
-            | n > 0     = False: generateFalseList (n-1)
-            | otherwise = error "Cannot generate list of negative length."
-
 -- | Load database from weight and value text files.
+--
+-- Expected format:
+-- each file contains same amount of lines in both files
+-- and each line contains one positive integer.
+-- Function DOES NOT check the value of integers!
 loadDatabaseFrom :: String -> String -> IO [(Int, Int)]
 loadDatabaseFrom weightsFileName valuesFileName = do
     allLinesW <- readFile weightsFileName
@@ -71,6 +75,9 @@ loadDatabaseFrom weightsFileName valuesFileName = do
         merge _ _ = error "Weights and values files have different amounts of values"
 
 -- | Default implementation of crossover between 2 chromosomes.
+--
+-- Takes half (random set of indices) of items as chosen in first parent,
+-- rest from second parent.
 defaultCrossover :: [(Int, Int)] -> (Chromosome, Chromosome) -> IO Chromosome
 defaultCrossover database ((Chromosome _ _ vals1), (Chromosome _ _ vals2)) = do
     let len = length vals1
@@ -92,9 +99,13 @@ defaultCrossover database ((Chromosome _ _ vals1), (Chromosome _ _ vals2)) = do
                     if vals2 !! currIndex then Chromosome (resW + weight) (resV + value) (True:vals)
                     else Chromosome resW resV (False:vals) )
 
--- | Get random n Ints in range [0,maxIndex - 1]
+-- | Get N random non-repeating Ints in range [0,maxIndex - 1]
+--
+-- If amount > maxIndex, returns pure []
 getRandInts :: Int -> Int -> IO [Int]
-getRandInts amount maxIndex = getRandInts' 0
+getRandInts amount maxIndex
+    | amount > maxIndex || amount < 0   = pure []
+    | otherwise                         = getRandInts' 0
     where
         getRandInts' :: Int -> IO [Int]
         getRandInts' currAmount
@@ -113,6 +124,9 @@ contains (x:xs) arg
     | otherwise     = contains xs arg
 
 -- | Default implementation of choosing parent from last generation.
+--
+-- Choosing random chromosome with higher value than random fraction of best solution.
+-- This algorithm prefers better solutions but can also choose worse ones.
 defaultChooseParent :: [Chromosome] -> IO Chromosome
 defaultChooseParent lastGen = do
     randDouble <- getStdRandom (randomR (0 :: Double, 1 :: Double))
@@ -127,6 +141,8 @@ defaultChooseParent lastGen = do
             | otherwise                     = defaultChooseParent lastGen
 
 -- | Implementation of mutation of a given chromosome.
+--
+-- Changes decision for ONE random item in the given chromosome.
 mutate :: [(Int, Int)] -> Chromosome -> IO Chromosome
 mutate database (Chromosome weight value vals) = do
     randInt <- getRandNum (0, length vals - 1)

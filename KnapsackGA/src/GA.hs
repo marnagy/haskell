@@ -15,6 +15,9 @@ mutationChance = 0.25 :: Double
 data GA_Args = Args [(Int, Int)] Int Double ([(Int, Int)] -> (Chromosome, Chromosome) -> IO Chromosome)
 
 -- | Main training function.
+--
+-- Sorts each generation and starts generating new one if amount of generations
+-- has not been reached.
 train :: String -> String -> Int -> Int -> IO Chromosome
 train weightsFileName valuesFileName genNum weightRestriction = do
     database <- loadDatabaseFrom weightsFileName valuesFileName
