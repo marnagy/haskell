@@ -7,7 +7,9 @@ import System.Random
 data Chromosome = Chromosome Int Int [Bool]
         deriving (Show)
 
--- | Generate a new random solution.
+-- | Generate ONE new random solution.
+--
+-- This adds random items until weight restriction is met.
 newChromosome :: [(Int, Int)] -> Int -> IO Chromosome
 newChromosome [] _ = error "Empty database"
 newChromosome database weightRestriction = do
@@ -99,7 +101,7 @@ defaultCrossover database ((Chromosome _ _ vals1), (Chromosome _ _ vals2)) = do
                     if vals2 !! currIndex then Chromosome (resW + weight) (resV + value) (True:vals)
                     else Chromosome resW resV (False:vals) )
 
--- | Get N random non-repeating Ints in range [0,maxIndex - 1]
+-- | Get N random non-repeating unsorted Ints in range [0,maxIndex - 1]
 --
 -- If amount > maxIndex, returns pure []
 --

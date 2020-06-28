@@ -39,7 +39,7 @@ train weightsFileName valuesFileName genNum weightRestriction = do
                     generateNextGen args 1 populationSize $ pure sorted
             | otherwise             = lastGenIO
 
--- | Generating first random generation.
+-- | Generate first random unsorted generation.
 firstGen :: [(Int, Int)] -> Int -> Int -> IO [Chromosome]
 firstGen database populationToGenerate weightRestriction
     | populationToGenerate == 0 = pure []
@@ -48,7 +48,7 @@ firstGen database populationToGenerate weightRestriction
         chrom <- newChromosome database weightRestriction
         pure (chrom : res)
 
--- | Generating next generation using crossover and mutation
+-- | Generate next generation using given crossover and mutation
 generateNextGen :: GA_Args -> Int -> Int -> IO [Chromosome] -> IO [Chromosome]
 generateNextGen args@(Args database weightRestriction mutationProb crossoverFunc) currAmount maxAmount lastGenIO
     | currAmount <= maxAmount    = do
