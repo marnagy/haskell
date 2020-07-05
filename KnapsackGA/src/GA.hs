@@ -21,8 +21,8 @@ data GA_Args = Args [(Int, Int)] Int Double ([(Int, Int)] -> (Chromosome, Chromo
 --
 -- Sorts each generation and starts generating new one if amount of generations
 -- has not been reached.
-train :: String -- ^ Name of file containing weights.
-    -> String -- ^ Name of file containing values.
+train :: String -- ^ Relative path to the file containing weights.
+    -> String -- ^ Relative path to the file containing values.
     -> Int -- ^ Number of generations to train.
     -> Int -- ^ Maximum amount of weight allowed.
     -> IO Chromosome -- ^ Best solution from the last generation.

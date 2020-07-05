@@ -8,6 +8,8 @@ module Knapsack
 import System.Random
 
 -- | Type used to store a solution.
+--
+-- Stores weight, value and list of items (True -> chosen, False -> NOT chosen)
 data Chromosome = Chromosome Int Int [Bool]
         deriving (Show)
 
