@@ -1,5 +1,6 @@
 -- | General implementation of GA for the knapsack problem.
-module GA where
+module GA 
+    (train, firstGen, generateNextGen) where
 
 import System.IO
 import Debug.Trace
@@ -9,16 +10,22 @@ import Knapsack
 populationSize = 20 :: Int
 
 -- | Default mutation chance.
-mutationChance = 0.25 :: Double
+mutationChance = 0.001 :: Double
 
 -- | Data type to store values that are not chaning thoughout the algorithm.
+--
+-- Contains: Database p(weight, values)], maximum weight, mutation probability, crossover function
 data GA_Args = Args [(Int, Int)] Int Double ([(Int, Int)] -> (Chromosome, Chromosome) -> IO Chromosome)
 
 -- | Main training function.
 --
 -- Sorts each generation and starts generating new one if amount of generations
 -- has not been reached.
-train :: String -> String -> Int -> Int -> IO Chromosome
+train :: String -- ^ Name of file containing weights.
+    -> String -- ^ Name of file containing values.
+    -> Int -- ^ Number of generations to train.
+    -> Int -- ^ Maximum amount of weight allowed.
+    -> IO Chromosome -- ^ Best solution from the last generation.
 train weightsFileName valuesFileName genNum weightRestriction = do
     database <- loadDatabaseFrom weightsFileName valuesFileName
     if 0 == length database then (error "Invalid database")
@@ -40,7 +47,10 @@ train weightsFileName valuesFileName genNum weightRestriction = do
             | otherwise             = lastGenIO
 
 -- | Generate first random unsorted generation.
-firstGen :: [(Int, Int)] -> Int -> Int -> IO [Chromosome]
+firstGen :: [(Int, Int)] -- ^ Database of (weight, value).
+    -> Int -- ^ Amount of solution in one generation.
+    -> Int -- ^ Maximum amount of weight allowed.
+    -> IO [Chromosome] -- ^ First generation.
 firstGen database populationToGenerate weightRestriction
     | populationToGenerate == 0 = pure []
     | otherwise                 = do
@@ -48,8 +58,12 @@ firstGen database populationToGenerate weightRestriction
         chrom <- newChromosome database weightRestriction
         pure (chrom : res)
 
--- | Generate next generation using given crossover and mutation
-generateNextGen :: GA_Args -> Int -> Int -> IO [Chromosome] -> IO [Chromosome]
+-- | Generate next generation using given crossover and mutation.
+generateNextGen :: GA_Args -- ^ Stores immutable arguments for generating next generation.
+    -> Int -- ^ Current number of generated memberrs of next generation.
+    -> Int -- ^ Amount of members to generate for next population.
+    -> IO [Chromosome] -- ^ Last generation.
+    -> IO [Chromosome] -- ^ Next generation.
 generateNextGen args@(Args database weightRestriction mutationProb crossoverFunc) currAmount maxAmount lastGenIO
     | currAmount <= maxAmount    = do
         lastGen <- lastGenIO
