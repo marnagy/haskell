@@ -131,16 +131,15 @@ getRandInts :: Int -- ^ Amount of random Ints to be generated.
     -> IO [Int] -- ^ Unsorted list of non-repeating Ints
 getRandInts amount maxIndex
     | amount > maxIndex || amount < 0   = error "Amount needs to be in range [0,maxIndex)."
-    | otherwise                         = getRandInts' 0
+    | otherwise                         = getRandInts' 0 []
     where
-        getRandInts' :: Int -> IO [Int]
-        getRandInts' currAmount
+        getRandInts' :: Int -> [Int] -> IO [Int]
+        getRandInts' currAmount akum
             | currAmount < amount   = do
-                res <- getRandInts' (currAmount + 1)
                 randInt <- getRandNum (0, maxIndex - 1)
-                if res `contains` randInt then getRandInts' currAmount
-                else pure (randInt:res)
-            | otherwise             = pure []
+                if akum `contains` randInt then getRandInts' currAmount akum
+                else getRandInts' (currAmount + 1) (randInt:akum)
+            | otherwise             = pure akum
 
 -- | Simple linear test if list contains value
 contains :: Eq a => [a] -- ^ List to search in.
