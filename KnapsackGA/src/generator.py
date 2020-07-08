@@ -7,3 +7,5 @@ with open("weights.txt", mode='w') as fw:
         for i in range(n):
             fw.write(str(randint(1,15)) + '\n')
             fv.write(str(randint(1,15)) + '\n')
+
+print("Files with weights and values have been created.")
