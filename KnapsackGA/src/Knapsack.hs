@@ -122,7 +122,7 @@ defaultCrossover database ((Chromosome _ _ vals1), (Chromosome _ _ vals2)) = do
 
 -- | Get N random non-repeating unsorted Ints in range [0,maxIndex - 1]
 --
--- If amount > maxIndex, returns pure []
+-- If amount > maxIndex or amount < 0, throws error.
 --
 -- >>>getRandInts 5 10
 -- [3,7,1,5,4]
@@ -130,7 +130,7 @@ getRandInts :: Int -- ^ Amount of random Ints to be generated.
     -> Int -- ^ Max index.
     -> IO [Int] -- ^ Unsorted list of non-repeating Ints
 getRandInts amount maxIndex
-    | amount > maxIndex || amount < 0   = pure []
+    | amount > maxIndex || amount < 0   = error "Amount needs to be in range [0,maxIndex)."
     | otherwise                         = getRandInts' 0
     where
         getRandInts' :: Int -> IO [Int]
