@@ -11,7 +11,11 @@ import System.Random
 --
 -- Stores weight, value and list of items (True -> chosen, False -> NOT chosen)
 data Chromosome = Chromosome Int Int [Bool]
-        deriving (Show)
+
+instance Show Chromosome where
+    show (Chromosome weight value values) =
+        "Chromosome weight:" ++ show weight ++
+            " value:" ++ show value ++ " choosing " ++ show values
 
 -- | Generate ONE new random solution.
 --
