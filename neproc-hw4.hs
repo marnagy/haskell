@@ -36,7 +36,8 @@ rleDecode_ number character ((num, nextChar):xs)
 -- Eratostenovo sito
 primes :: [Integer]
 primes = primes_ [2..]
-primes_ (x:xs) = x: primes_ [ y | y <- xs, y `mod` x /= 0]
+	where
+		primes_ (x:xs) = x: primes_ [ y | y <- xs, y `mod` x /= 0]
 
 -- 3) Implementujte mergesort.
 

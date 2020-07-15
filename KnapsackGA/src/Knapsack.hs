@@ -88,12 +88,7 @@ loadDatabaseFrom weightsFileName valuesFileName = do
     allLinesV <- readFile valuesFileName
     let wList = map read $ lines allLinesW :: [Int]
     let vList = map read $ lines allLinesV :: [Int]
-    pure $ merge wList vList
-    where
-        merge :: [Int] -> [Int] -> [(Int, Int)]
-        merge (x:xs) (y:ys) = (x,y):merge xs ys
-        merge [] [] = []
-        merge _ _ = error "Weights and values files have different amounts of values"
+    pure $ zip wList vList
 
 -- | Default implementation of crossover between 2 chromosomes.
 --
@@ -201,7 +196,7 @@ sortWith comp (x:xs) = do
             (b, y:a)
         
         mergeWith :: (a -> a -> Bool) -> [a] -> [a] -> [a]
-        mergeWith _ x [] = x
+        mergeWith _ val [] = val
         mergeWith _ [] y = y
         mergeWith comp (x:xs) (y:ys)
             | comp x y  = x: mergeWith comp xs (y:ys)
