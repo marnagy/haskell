@@ -154,7 +154,7 @@ contains (x:xs) arg
 defaultChooseParent :: [Chromosome] -- ^ Generation of Chromosome to choose from.
     -> IO Chromosome -- ^ Chosen parent.
 defaultChooseParent lastGen = do
-    randDouble <- getStdRandom (randomR (0 :: Double, 1 :: Double))
+    randDouble <- getRandDouble (0, 1)
     let Chromosome _ value _ = lastGen !! 0
     let refValue = randDouble * fromIntegral value
     randInt <- getRandNum (0, length lastGen - 1)
