@@ -34,7 +34,7 @@ train weightsFileName valuesFileName genNum weightRestriction = do
         lastGen <- train' args 1 genNum $ 
             firstGen database populationSize weightRestriction
         let sorted = sortWith (\x@(Chromosome _ value1 _) y@(Chromosome _ value2 _) -> value1 > value2) lastGen
-        pure (sorted !! 0)
+        pure (head sorted)
     where
         train' :: GA_Args -> Int -> Int -> IO [Chromosome] -> IO [Chromosome]
         train' args@(Args database weightRestriction mutationProb crossoverFunc) currGenNum genNum lastGenIO
